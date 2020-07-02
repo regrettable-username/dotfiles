@@ -21,6 +21,7 @@ Plugin 'skywind3000/asyncrun.vim'
 Plugin 'tpope/vim-commentary'
 Plugin 'jeaye/color_coded'
 Plugin 'tikhomirov/vim-glsl'
+Plugin 'jnurmine/Zenburn'
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -33,8 +34,14 @@ set foldnestmax=1
 syntax enable
 set background=dark
 let g:solarized_termcolors=256
-colorscheme solarized
+" colorscheme solarized
 
+if has('gui_running')
+  set background=dark
+  colorscheme solarized
+else
+  colorscheme zenburn
+endif
 "let g:ycm_use_clang=1
 let g:ycm_semantic_triggers =  {
   \   'c' : ['->', '.','re![_a-zA-z0-9]'],
@@ -64,8 +71,7 @@ let g:easyescape_timeout = 100
 
 cnoremap jk <ESC>
 cnoremap kj <ESC>
-vnoremap jk <ESC>
-vnoremap kj <ESC>
+vnoremap <Space> <ESC>
 
 " Ctrl h/j/k/l to switch buffers.
 nnoremap <C-J> <C-W><C-J>
