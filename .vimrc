@@ -20,10 +20,15 @@ Plugin 'vhdirk/vim-cmake'
 Plugin 'skywind3000/asyncrun.vim'
 Plugin 'tpope/vim-commentary'
 Plugin 'jeaye/color_coded'
+Plugin 'tikhomirov/vim-glsl'
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
 
+autocmd! BufNewFile,BufRead *.vs,*.fs set ft=glsl
+
+set foldmethod=indent
+set foldnestmax=1
 " Color Scheme
 syntax enable
 set background=dark
@@ -53,24 +58,27 @@ set shiftwidth=2
 set softtabstop=2
 set number
 
+" JK/KJ to escape insert and visual modes.
 let g:easyescape_chars = { "j": 1, "k": 1 }
-let g:easyescape_timeout = 60
+let g:easyescape_timeout = 100
 
 cnoremap jk <ESC>
 cnoremap kj <ESC>
 vnoremap jk <ESC>
 vnoremap kj <ESC>
 
+" Ctrl h/j/k/l to switch buffers.
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
 nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
 
+" Ctrl a to add line above Ctrl s to add line below.
 nmap <C-a> O<Esc>jk
 nmap <C-s> o<Esc>jk
  
-let g:asyncrun_open = 10
-nnoremap <F3> :AsyncRun -cwd=<root> sh ~/dev/dotfiles/build-and-run.sh <cr>
+let g:asyncrun_open = 6
+nnoremap <F3> :AsyncStop <cr> :AsyncRun -cwd=<root> sh ~/dev/dotfiles/build-and-run.sh <cr>
 nnoremap <F5> :AsyncRun -cwd=<root> sh ~/dev/dotfiles/build-and-debug.sh <cr>
 
 packadd termdebug
