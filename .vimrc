@@ -22,6 +22,7 @@ Plugin 'tpope/vim-commentary'
 Plugin 'jeaye/color_coded'
 Plugin 'tikhomirov/vim-glsl'
 Plugin 'jnurmine/Zenburn'
+Plugin 'jiangmiao/auto-pairs'
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -61,6 +62,9 @@ nnoremap <leader>] :YcmCompleter GoToDefinition<CR>
 set completeopt-=preview 
 "let g:syntastic_cpp_clang_check_post_args = ""
 set expandtab
+set smarttab
+set ai
+set si
 set shiftwidth=2
 set softtabstop=2
 set number
@@ -84,7 +88,8 @@ nmap <C-a> O<Esc>jk
 nmap <C-s> o<Esc>jk
  
 let g:asyncrun_open = 6
-nnoremap <F3> :AsyncStop <cr> :AsyncRun -cwd=<root> sh ~/dev/dotfiles/build-and-run.sh <cr>
+nnoremap <F2> :AsyncStop <cr> 
+nnoremap <F3> :AsyncRun -cwd=<root> sh ~/dev/dotfiles/build-and-run.sh <cr>
 nnoremap <F5> :AsyncRun -cwd=<root> sh ~/dev/dotfiles/build-and-debug.sh <cr>
 
 packadd termdebug
