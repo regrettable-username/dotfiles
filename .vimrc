@@ -21,6 +21,7 @@ Plugin 'skywind3000/asyncrun.vim'
 Plugin 'tpope/vim-commentary'
 Plugin 'jeaye/color_coded'
 Plugin 'tikhomirov/vim-glsl'
+Plugin 'rking/ag.vim'
 Plugin 'jnurmine/Zenburn'
 Plugin 'jiangmiao/auto-pairs'
 " All of your Plugins must be added before the following line
