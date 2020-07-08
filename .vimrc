@@ -32,6 +32,7 @@ autocmd! BufNewFile,BufRead *.vs,*.fs set ft=glsl
 
 set foldmethod=indent
 set foldnestmax=1
+set nofoldenable
 " Color Scheme
 syntax enable
 set background=dark
@@ -60,6 +61,8 @@ let g:ycm_semantic_triggers =  {
   \ }
 
 nnoremap <leader>] :YcmCompleter GoToDefinition<CR> 
+let g:ycm_enable_diagnostic_signs = 1
+
 set completeopt-=preview 
 "let g:syntastic_cpp_clang_check_post_args = ""
 set expandtab
@@ -83,6 +86,15 @@ nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
 nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
+
+" Cmd T tags window
+nnoremap <leader>r :CommandTTag<CR> 
+
+" Allow us to use Ctrl-s and Ctrl-q as keybinds
+silent !stty -ixon
+
+" Restore default behaviour when leaving Vim.
+autocmd VimLeave * silent !stty ixon
 
 " Ctrl a to add line above Ctrl s to add line below.
 nmap <C-a> O<Esc>jk
