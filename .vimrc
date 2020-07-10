@@ -24,15 +24,24 @@ Plugin 'tikhomirov/vim-glsl'
 Plugin 'rking/ag.vim'
 Plugin 'jnurmine/Zenburn'
 Plugin 'jiangmiao/auto-pairs'
+Plugin 'majutsushi/tagbar'
+
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
 
+" GLSL coloring
 autocmd! BufNewFile,BufRead *.vs,*.fs set ft=glsl
 
+" Tagbar
+noremap <F8> :TagbarToggle<CR>
+let g:tagbar_autofocus = 1
+
+" Folding
 set foldmethod=indent
 set foldnestmax=1
 set nofoldenable
+
 " Color Scheme
 syntax enable
 set background=dark
@@ -45,6 +54,7 @@ if has('gui_running')
 else
   colorscheme zenburn
 endif
+
 "let g:ycm_use_clang=1
 let g:ycm_semantic_triggers =  {
   \   'c' : ['->', '.','re![_a-zA-z0-9]'],
