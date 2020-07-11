@@ -36,6 +36,33 @@ autocmd! BufNewFile,BufRead *.vs,*.fs set ft=glsl
 " Tagbar
 noremap <F8> :TagbarToggle<CR>
 let g:tagbar_autofocus = 1
+" Toggle Header/CPP in same dir
+map <F4> :e %:p:s,.h$,.X123X,:s,.cpp$,.h,:s,.X123X$,.cpp,<CR>
+" netrw setup
+let g:NetrwIsOpen=0
+nmap <unique> <c-p> <Plug>NetrwRefresh
+function! ToggleNetrw()
+    if g:NetrwIsOpen
+        let i = bufnr("$")
+        while (i >= 1)
+            if (getbufvar(i, "&filetype") == "netrw")
+                silent exe "bwipeout " . i 
+            endif
+            let i-=1
+        endwhile
+        let g:NetrwIsOpen=0
+    else
+        let g:NetrwIsOpen=1
+        silent Lexplore
+    endif
+endfunction
+let g:netrew_sort_sequence = '[\/]$,\<core\%(\.\d\+\)\=,\.[a-np-z]$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$'
+let g:netrw_banner = 0
+let g:netrw_liststyle = 3
+let g:netrw_browse_split = 4
+let g:netrw_altv = 1
+let g:netrw_winsize = 15
+noremap <F9> :call ToggleNetrw()<CR>
 
 " Folding
 set foldmethod=indent
