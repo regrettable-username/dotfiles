@@ -140,6 +140,7 @@ nmap <C-a> O<Esc>jk
 nmap <C-s> o<Esc>jk
  
 let g:asyncrun_open = 6
+let g:asyncrun_rootmarks = ['build']
 nnoremap <F2> :AsyncStop <cr> 
 nnoremap <F3> :AsyncRun -cwd=<root> sh ~/dev/dotfiles/build-and-run.sh <cr>
 nnoremap <F5> :AsyncRun -cwd=<root> sh ~/dev/dotfiles/build-and-debug.sh <cr>
