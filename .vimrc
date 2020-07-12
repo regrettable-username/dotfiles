@@ -31,13 +31,15 @@ call vundle#end()            " required
 filetype plugin indent on    " required
 
 " GLSL coloring
-autocmd! BufNewFile,BufRead *.vs,*.fs set ft=glsl
+autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
 
 " Tagbar
 noremap <F8> :TagbarToggle<CR>
 let g:tagbar_autofocus = 1
+
 " Toggle Header/CPP in same dir
 map <F4> :e %:p:s,.h$,.X123X,:s,.cpp$,.h,:s,.X123X$,.cpp,<CR>
+
 " netrw setup
 let g:NetrwIsOpen=0
 nmap <unique> <c-p> <Plug>NetrwRefresh
