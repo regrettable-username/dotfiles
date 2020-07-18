@@ -66,6 +66,14 @@ let g:netrw_altv = 1
 let g:netrw_winsize = 15
 noremap <F9> :call ToggleNetrw()<CR>
 
+" Copy and paste stuff 
+nnoremap p p=`]
+nnoremap <c-k> p 
+nnoremap <leader>d "_d
+xnoremap <leader>d "_d
+xnoremap <leader>p "_dP
+
+
 " Folding
 set foldmethod=indent
 set foldnestmax=1
@@ -139,8 +147,11 @@ autocmd VimLeave * silent !stty ixon
 nmap <C-a> O<Esc>jk
 nmap <C-s> o<Esc>jk
  
-let g:asyncrun_open = 16
+" Map first non-blank to Ctrl n and EOL to Ctrl m
+nmap <C-n> ^
+nmap <C-m> $
 
+let g:asyncrun_open = 16
 let g:asyncrun_rootmarks = ['build']
 nnoremap <F2> :AsyncStop <cr> 
 nnoremap <F3> :AsyncRun -mode=term -pos=right -cwd=<root> sh ~/dev/dotfiles/build-and-run.sh <cr>
