@@ -13,6 +13,7 @@ Plugin 'VundleVim/Vundle.vim'
 
 Plugin 'git://git.wincent.com/command-t.git'
 Plugin 'ycm-core/YouCompleteMe'
+Plugin 'puremourning/vimspector'
 "Plugin 'vim-syntastic/syntastic'
 Plugin 'altercation/vim-colors-solarized'
 Plugin 'zhou13/vim-easyescape'
@@ -25,6 +26,10 @@ Plugin 'rking/ag.vim'
 Plugin 'jnurmine/Zenburn'
 Plugin 'jiangmiao/auto-pairs'
 Plugin 'majutsushi/tagbar'
+
+" vimspector
+let g:vimspector_enable_mappings = 'HUMAN'
+let g:vimspector_install_gadgets = [ 'debugpy', 'vscode-cpptools', 'CodeLLDB' ]
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -73,6 +78,28 @@ nnoremap <leader>d "_d
 xnoremap <leader>d "_d
 xnoremap <leader>p "_dP
 
+" Navigation
+nmap <Up>    <Nop>
+nmap <Down>  <Nop>
+nmap <Left>  <Nop>
+nmap <Right> <Nop>
+map $ <Nop>
+map ^ <Nop>
+map { <Nop>
+map } <Nop>
+noremap K     {
+noremap J     }
+noremap H     ^
+noremap L     $
+
+imap <Up>    <Nop>
+imap <Down>  <Nop>
+imap <Left>  <Nop>
+imap <Right> <Nop>
+inoremap <C-k> <Up>
+inoremap <C-j> <Down>
+inoremap <C-h> <Left>
+inoremap <C-l> <Right>
 
 " Folding
 set foldmethod=indent
@@ -109,6 +136,7 @@ let g:ycm_semantic_triggers =  {
 
 nnoremap <leader>] :YcmCompleter GoToDefinition<CR> 
 let g:ycm_enable_diagnostic_signs = 1
+let g:ycm_confirm_extra_conf = 0
 
 set completeopt-=preview 
 "let g:syntastic_cpp_clang_check_post_args = ""
@@ -119,10 +147,11 @@ set si
 set shiftwidth=2
 set softtabstop=2
 set number
-
+set mouse=a
 " JK/KJ to escape insert and visual modes.
 let g:easyescape_chars = { "j": 1, "k": 1 }
 let g:easyescape_timeout = 100
+let g:termdebug_wide=1
 
 cnoremap jk <ESC>
 cnoremap kj <ESC>
@@ -147,14 +176,14 @@ autocmd VimLeave * silent !stty ixon
 nmap <C-a> O<Esc>jk
 nmap <C-s> o<Esc>jk
  
-" Map first non-blank to Ctrl n and EOL to Ctrl m
-nmap <C-n> ^
-nmap <C-m> $
+" " Map first non-blank to Ctrl n and EOL to Ctrl m
+" nmap <C-n> ^
+" nmap <C-m> $
 
-let g:asyncrun_open = 16
+let g:asyncrun_open = 6
 let g:asyncrun_rootmarks = ['build']
-nnoremap <F2> :AsyncStop <cr> 
-nnoremap <F3> :AsyncRun -mode=term -pos=right -cwd=<root> sh ~/dev/dotfiles/build-and-run.sh <cr>
-nnoremap <F5> :AsyncRun -cwd=<root> sh ~/dev/dotfiles/build-and-debug.sh <cr>
+nnoremap <S-F6> :call asyncrun#quickfix_toggle(6)<cr>
+nnoremap <S-F2> :AsyncStop <cr> 
+nnoremap <S-F3> :AsyncRun -mode=term -pos=right -cwd=<root> sh ~/dev/dotfiles/build-and-run.sh <cr>
+nnoremap <S-F5> :AsyncRun clang++ -g -Wall "$(VIM_FILEPATH)" -o "$(VIM_FILEDIR)/bin/program" <cr>
 
-packadd termdebug
