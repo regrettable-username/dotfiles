@@ -16,6 +16,7 @@ Plugin 'ycm-core/YouCompleteMe'
 Plugin 'puremourning/vimspector'
 "Plugin 'vim-syntastic/syntastic'
 Plugin 'altercation/vim-colors-solarized'
+Plugin 'rafi/awesome-vim-colorschemes'
 Plugin 'zhou13/vim-easyescape'
 Plugin 'vhdirk/vim-cmake'
 Plugin 'skywind3000/asyncrun.vim'
@@ -24,22 +25,41 @@ Plugin 'jeaye/color_coded'
 Plugin 'tikhomirov/vim-glsl'
 Plugin 'rking/ag.vim'
 Plugin 'jnurmine/Zenburn'
-Plugin 'jiangmiao/auto-pairs'
+" Plugin 'jiangmiao/auto-pairs'
 Plugin 'majutsushi/tagbar'
-
-" vimspector
-let g:vimspector_enable_mappings = 'HUMAN'
-let g:vimspector_install_gadgets = [ 'debugpy', 'vscode-cpptools', 'CodeLLDB' ]
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
+"
+" vimspector
+let g:vimspector_enable_mappings = 'HUMAN'
+nmap <F6> <Plug>VimspectorStepOver
+nmap <F7> <Plug>VimspectorStepInto
+nmap <F8> <Plug>VimspectorStepOut
+
+let g:vimspector_install_gadgets = [ 'debugpy', 'vscode-cpptools', 'CodeLLDB' ]
+
+function s:SetUpTerminal()
+  " Customise the terminal window size/position
+  " For some reasons terminal buffers in Neovim have line numbers
+  call win_gotoid( g:vimspector_session_windows.terminal )
+  set norelativenumber nonumber
+  call feedkeys("\<C-W><S-N>")
+  " call feedkeys("\<C-W> N")
+endfunction
+
+augroup MyVimspectorUICustomistaion
+  autocmd!
+  autocmd User VimspectorTerminalOpened call s:SetUpTerminal()
+augroup END
+
 filetype plugin indent on    " required
 
 " GLSL coloring
 autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
 
 " Tagbar
-noremap <F8> :TagbarToggle<CR>
+noremap <S-F8> :TagbarToggle<CR>
 let g:tagbar_autofocus = 1
 
 " Toggle Header/CPP in same dir
@@ -69,7 +89,7 @@ let g:netrw_liststyle = 3
 let g:netrw_browse_split = 4
 let g:netrw_altv = 1
 let g:netrw_winsize = 15
-noremap <F9> :call ToggleNetrw()<CR>
+noremap <S-F9> :call ToggleNetrw()<CR>
 
 " Copy and paste stuff 
 nnoremap p p=`]
@@ -77,7 +97,14 @@ nnoremap <c-k> p
 nnoremap <leader>d "_d
 xnoremap <leader>d "_d
 xnoremap <leader>p "_dP
+set clipboard=unnamed
 
+" Ctrl h/j/k/l to switch buffers.
+nnoremap <C-J> <C-W><C-J>
+nnoremap <C-K> <C-W><C-K>
+nnoremap <C-L> <C-W><C-L>
+nnoremap <C-H> <C-W><C-H>
+"
 " Navigation
 nmap <Up>    <Nop>
 nmap <Down>  <Nop>
@@ -107,17 +134,25 @@ set foldnestmax=1
 set nofoldenable
 
 " Color Scheme
-syntax enable
-set background=dark
-let g:solarized_termcolors=256
+" syntax enable
+" set background=dark
+" let g:solarized_termcolors=256
 " colorscheme solarized
 
-if has('gui_running')
-  set background=dark
-  colorscheme solarized
-else
-  colorscheme zenburn
+" if has('gui_running')
+"   set background=dark
+"   colorscheme solarized
+" else
+"   colorscheme zenburn
+" endif
+
+syntax on
+if (has("termguicolors"))
+  set termguicolors
 endif
+let g:oceanic_next_terminal_bold = 1
+let g:oceanic_next_terminal_italic = 1
+colorscheme OceanicNext
 
 "let g:ycm_use_clang=1
 let g:ycm_semantic_triggers =  {
@@ -157,11 +192,6 @@ cnoremap jk <ESC>
 cnoremap kj <ESC>
 vnoremap <Space> <ESC>
 
-" Ctrl h/j/k/l to switch buffers.
-nnoremap <C-J> <C-W><C-J>
-nnoremap <C-K> <C-W><C-K>
-nnoremap <C-L> <C-W><C-L>
-nnoremap <C-H> <C-W><C-H>
 
 " Cmd T tags window
 nnoremap <leader>r :CommandTTag<CR> 
@@ -184,6 +214,6 @@ let g:asyncrun_open = 6
 let g:asyncrun_rootmarks = ['build']
 nnoremap <S-F6> :call asyncrun#quickfix_toggle(6)<cr>
 nnoremap <S-F2> :AsyncStop <cr> 
-nnoremap <S-F3> :AsyncRun -mode=term -pos=right -cwd=<root> sh ~/dev/dotfiles/build-and-run.sh <cr>
-nnoremap <S-F5> :AsyncRun clang++ -g -Wall "$(VIM_FILEPATH)" -o "$(VIM_FILEDIR)/bin/program" <cr>
+nnoremap <S-F5> :AsyncRun -mode=term -pos=right -cwd=<root> sh ~/dev/dotfiles/build-and-run.sh <cr>
+" nnoremap <S-F5> :AsyncRun clang++ -std=c++1y -g -Wall "$(VIM_FILEPATH)" -o "$(VIM_FILEDIR)/bin/program" <cr>
 
