@@ -4,7 +4,6 @@ vim.g.loaded_netrwPlugin = 1
 
 -- set termguicolors to enable highlight groups
 vim.opt.termguicolors = true
-
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
@@ -37,6 +36,7 @@ require("lazy").setup({
   'hrsh7th/nvim-cmp',
   'hrsh7th/cmp-nvim-lsp', -- LSP source for nvim-cmp
   'ziglang/zig.vim',
+  {'akinsho/bufferline.nvim', version = "*", dependencies = 'nvim-tree/nvim-web-devicons'},
 })
 -- Setup mason for lsp help 
 require("mason").setup()
@@ -99,7 +99,9 @@ require("nvim-tree").setup({
 
 
 -- LSP config 
-require('nvim-lsp-installer').setup {}
+require('nvim-lsp-installer').setup {
+  diagnostics = "nvim_lsp",
+}
 local lspconfig = require('lspconfig')
 
 -- Define a table to hold specific configuration for each server
@@ -112,6 +114,7 @@ local server_settings = {
                 },
                 workspace = {
                     library = vim.api.nvim_get_runtime_file("", true),
+                    checkThirdParty = false,
                 },
                 telemetry = {
                     enable = false,
@@ -217,6 +220,9 @@ require('illuminate').configure({
     -- case_insensitive_regex: sets regex case sensitivity
     case_insensitive_regex = false,
 })
+-- Bufferline config
+vim.opt.termguicolors = true
+require("bufferline").setup{}
 
 vim.o.expandtab = true
 vim.o.shiftwidth = 2
