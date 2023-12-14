@@ -17,7 +17,7 @@ alias co="git checkout"
 alias gph="git push origin head"
 alias gs="git stash"
 alias gsp="git stash pop"
-alias vim="~/.local/bin/lvim"
+alias vim="~/.local/bin/nvim"
 
 # Set up ls colors
 export LSCOLORS="ExGxBxDxCxEgEdxbxgxcxd"
