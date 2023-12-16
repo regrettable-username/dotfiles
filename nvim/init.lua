@@ -6,28 +6,47 @@ vim.g.loaded_netrwPlugin = 1
 vim.opt.termguicolors = true
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
-  vim.fn.system({
+  local result = vim.fn.system({
     "git",
     "clone",
     "--filter=blob:none",
-    "git@github.com:folke/lazy.nvim.git",
+    "https://github.com/folke/lazy.nvim.git",
     "--branch=stable", -- latest stable release
     lazypath,
   })
+  -- Debugging: Print any error messages
+  if vim.v.shell_error ~= 0 then
+    print("Error cloning lazy.nvim: ", result)
+  end
 end
 vim.opt.rtp:prepend(lazypath)
 
 vim.g.mapleader = " "
 
 require("lazy").setup({
-  'folke/which-key.nvim',
+  {
+    "folke/which-key.nvim",
+    event = "VeryLazy",
+    init = function()
+      vim.o.timeout = true
+      vim.o.timeoutlen = 400
+    end,
+    opts = {
+      -- your configuration comes here
+      -- or leave it empty to use the default settings
+      -- refer to the configuration section below
+    },
+  },
+
   'numToStr/Comment.nvim',
   'nvim-telescope/telescope.nvim',
   'nvim-treesitter/nvim-treesitter',
   'nvim-tree/nvim-tree.lua',
   'RRethy/vim-illuminate',
   'nvim-lua/plenary.nvim',  -- Dependency for Telescope
-    { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }, -- Optional for better performance
+
+  { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }, -- Optional for better performance
+
   'morhetz/gruvbox',
   'neovim/nvim-lspconfig',
   'williamboman/mason.nvim',
@@ -37,7 +56,44 @@ require("lazy").setup({
   'hrsh7th/cmp-nvim-lsp', -- LSP source for nvim-cmp
   'ziglang/zig.vim',
   {'akinsho/bufferline.nvim', version = "*", dependencies = 'nvim-tree/nvim-web-devicons'},
+  {'akinsho/toggleterm.nvim', version = "*", config = true},
+  {
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    event = "InsertEnter",
+    config = function()
+      require("copilot").setup({})
+    end,
+  },
+
+  {
+     "zbirenbaum/copilot-cmp",
+     after = { "copilot.lua" },
+     config = function ()
+       require("copilot_cmp").setup()
+     end
+  },
 })
+
+-- Setup Toggleterm
+require("toggleterm").setup{
+  size = 10,
+  open_mapping = [[<c-b>]],
+  shade_filetypes = {},
+  shade_terminals = true,
+  shading_factor = 1,
+  start_in_insert = true,
+  insert_mappings = true,
+  persist_size = true,
+  direction = 'horizontal',
+}
+
+-- Setup copilot
+require("copilot").setup({
+  suggestion = { enabled = false },
+  panel = { enabled = false },
+})
+
 -- Setup mason for lsp help 
 require("mason").setup()
 require("mason-lspconfig").setup()
@@ -97,7 +153,6 @@ require("nvim-tree").setup({
   on_attach = tree_on_attach,
 })
 
-
 -- LSP config 
 require('nvim-lsp-installer').setup {
   diagnostics = "nvim_lsp",
@@ -122,11 +177,17 @@ local server_settings = {
             },
         },
     },
+    clangd = {
+      cmd = {
+          "clangd",
+          "--offset-encoding=utf-16",
+      },
+    },
     -- Add specific settings for other servers here if needed
 }
 
 -- List of servers you want to setup
-local servers = {'pyright', 'tsserver', 'rust_analyzer', 'lua_ls', 'zls'}
+local servers = {'pyright', 'tsserver', 'rust_analyzer', 'lua_ls', 'zls', 'clangd'}
 
 for _, lsp in ipairs(servers) do
     lspconfig[lsp].setup(vim.tbl_deep_extend("force", {
@@ -160,7 +221,8 @@ cmp.setup({
         -- Add other mappings as needed
     }),
     sources = cmp.config.sources({
-        { name = 'nvim_lsp' },
+        { name = "copilot", group_index = 2 },
+        { name = 'nvim_lsp', group_index = 2 },
         -- Add other sources as needed
     }),
 })
@@ -227,6 +289,7 @@ require("bufferline").setup{}
 vim.o.expandtab = true
 vim.o.shiftwidth = 2
 vim.o.tabstop = 2
+vim.o.number = true
 vim.cmd [[
   augroup LineNumbers
     autocmd!
@@ -236,7 +299,6 @@ vim.cmd [[
 ]]
 
 -- Set absolute line numbers by default
-vim.wo.number = true
 
 local map = vim.api.nvim_set_keymap
 local opts = { noremap = true, silent = true }
@@ -251,22 +313,41 @@ map('n', 'K', '{', opts)
 map('n', 'L', '$', opts)
 map('n', 'H', '^', opts)
 
--- Line insertion mappings
-map('n', '<Leader>a', 'O<Esc>', opts)
-map('n', '<Leader>s', 'o<Esc>k', opts)
-map('n', '<Leader>d', 'o<Esc>kO<Esc>j', opts)
+-- Setup whichkey
+local wk = require("which-key")
 
--- Telescope mappings
-map('n', '<leader>ff', '<cmd>Telescope find_files<cr>', opts)
-map('n', '<leader>fg', '<cmd>Telescope live_grep<cr>', opts)
-map('n', '<leader>fb', '<cmd>Telescope buffers<cr>', opts)
-map('n', '<leader>fh', '<cmd>Telescope help_tags<cr>', opts)
-map('n', '<leader>fo', '<cmd>Telescope lsp_workspace_symbols<cr>', opts)
-map('n', '<leader>fd', '<cmd>Telescope lsp_document_symbols<cr>', opts)
-map('n', '<leader>fd', '<cmd>Telescope lsp_document_symbols<cr>', opts)
-map('n', '<leader>r', '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
-map('n', '<leader>e', ':NvimTreeToggle<cr>', opts)
--- local api = require("nvim-tree").api
--- map('n', '<leader>e', api.tree.toggle, opts)
+wk.register({
+  ["<leader>e"] = { "<cmd>NvimTreeToggle<cr>", "File Tree" },
+  ["<leader>a"] = { "O<Esc>", "Insert Line Above" },
+  ["<leader>s"] = { "o<Esc>k", "Insert Line Below" },
+  ["<leader>d"] = { "o<Esc>kO<Esc>j", "Pad Line" },
+})
+
+wk.register({
+  ["<leader>c"] = { name = "+nvim config" },
+  ["<leader>cc"] = { "<cmd>edit ~/.config/nvim/init.lua<cr>", "Edit init.lua" },
+})
+
+wk.register({
+  ["<leader>["] = { "<cmd>bp<cr>", "Prev. Tab" },
+  ["<leader>]"] = { "<cmd>bn<cr>", "Next Tab" },
+  ["<leader>q"] = { "<cmd>bd<cr>", "Close Tab" },
+})
+
+wk.register({
+  ["<leader>f"] = { name = "+file" },
+  ["<leader>ff"] = { "<cmd>Telescope find_files<cr>", "Find File" },
+  ["<leader>fr"] = { "<cmd>Telescope oldfiles<cr>", "Open Recent File" },
+  ["<leader>fb"] = { "<cmd>Telescope buffers<cr>", "Open Buffer" },
+  ["<leader>fn"] = { "<cmd>enew<cr>", "New File" },
+  ["<leader>fg"] = { "<cmd>Telescope live_grep<cr>", "Live Grep"},
+})
+
+wk.register({
+  ["<leader>l"] = { name = "+lsp" },
+  ["<leader>lk"] = { "<cmd>Telescope lsp_workspace_symbols<cr>", "Find Symbols" },
+  ["<leader>ld"] = { "<cmd>Telescope lsp_document_symbols<cr>", "Find Document Symbols" },
+  ["<leader>lr"] = { "<cmd>lua vim.lsp.buf.rename()<cr>", "Replace Document Symbols" },
+})
 
 vim.cmd("colorscheme gruvbox")
