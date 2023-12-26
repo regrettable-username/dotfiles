@@ -47,7 +47,6 @@ require("lazy").setup({
 
   { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }, -- Optional for better performance
 
-  'morhetz/gruvbox',
   'neovim/nvim-lspconfig',
   'williamboman/mason.nvim',
   'williamboman/mason-lspconfig.nvim',
@@ -55,6 +54,7 @@ require("lazy").setup({
   'hrsh7th/nvim-cmp',
   'hrsh7th/cmp-nvim-lsp', -- LSP source for nvim-cmp
   'ziglang/zig.vim',
+  {'nvim-lualine/lualine.nvim'},
   {'akinsho/bufferline.nvim', version = "*", dependencies = 'nvim-tree/nvim-web-devicons'},
   {'akinsho/toggleterm.nvim', version = "*", config = true},
   {
@@ -73,6 +73,49 @@ require("lazy").setup({
        require("copilot_cmp").setup()
      end
   },
+  {
+  "jackMort/ChatGPT.nvim",
+    event = "VeryLazy",
+    dependencies = {
+      "MunifTanjim/nui.nvim",
+      "nvim-lua/plenary.nvim",
+      "nvim-telescope/telescope.nvim"
+    },
+    config = function()
+      require("chatgpt").setup({
+        api_key_cmd = "op read op://private/OpenAIKeys/credential --no-newline",
+        openai_params = {
+          model = "gpt-4-1106-preview",
+        }
+      })
+    end,
+  },
+  { "catppuccin/nvim", name = "catppuccin", priority = 1000 },
+  {
+    'xbase-lab/xbase',
+    dependencies = {
+      'neovim/nvim-lspconfig',
+    },
+    build = "make install",
+    config = function()
+      require 'xbase'.setup {
+        log_level = vim.log.levels.DEBUG,
+        simctl = {
+          iOS = {
+            "iPhone 15 Pro"
+          }
+        },
+        mappings = {
+          build_picker = 0,
+          run_picker = 0,
+          watch_picker = 0,
+          all_picker = 0,
+          toggle_split_log_buffer = 0,
+          toggle_vsplit_log_buffer = 0
+        }
+      }
+    end
+  }
 })
 
 -- Setup Toggleterm
@@ -183,11 +226,33 @@ local server_settings = {
           "--offset-encoding=utf-16",
       },
     },
+    sourcekit = {
+      on_attach = function(_, bufnr)
+        vim.keymap.set('n', '<leader>dp', require "xbase.pickers.builtin".actions, { desc = "XBase picker" })
+
+        local opts = {noremap = true, silent = true}
+        vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd',
+        '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
+        vim.api.nvim_buf_set_keymap(bufnr, 'n', '$',
+        '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
+        vim.keymap.set('n', '<leader>dl', function()
+          require "xbase.logger".toggle(false, true)
+        end, { desc = "XBase logger" })
+      end,
+      filetypes = { "swift" },
+      root_dir = lspconfig.util.root_pattern("*.xcodeproj", "*.xcworkspace", "Package.swift", ".git", "project.yml", "Project.swift"),
+      cmd = {
+        "xcrun",
+        "sourcekit-lsp",
+        "--log-level",
+        "debug"
+      }
+    },
     -- Add specific settings for other servers here if needed
 }
 
 -- List of servers you want to setup
-local servers = {'pyright', 'tsserver', 'rust_analyzer', 'lua_ls', 'zls', 'clangd'}
+local servers = {'pyright', 'tsserver', 'rust_analyzer', 'lua_ls', 'zls', 'clangd', 'sourcekit'}
 
 for _, lsp in ipairs(servers) do
     lspconfig[lsp].setup(vim.tbl_deep_extend("force", {
@@ -282,14 +347,25 @@ require('illuminate').configure({
     -- case_insensitive_regex: sets regex case sensitivity
     case_insensitive_regex = false,
 })
+
 -- Bufferline config
+require("bufferline").setup()
+--lualine 
+require('lualine').setup {}
 vim.opt.termguicolors = true
-require("bufferline").setup{}
 
 vim.o.expandtab = true
 vim.o.shiftwidth = 2
 vim.o.tabstop = 2
+vim.o.softtabstop = 2
 vim.o.number = true
+vim.o.clipboard = "unnamedplus"
+vim.o.hlsearch = false
+vim.o.mouse = 'a'
+vim.o.undofile = true
+vim.o.ignorecase = true
+vim.o.smartcase = true
+
 vim.cmd [[
   augroup LineNumbers
     autocmd!
@@ -317,6 +393,11 @@ map('n', 'H', '^', opts)
 local wk = require("which-key")
 
 wk.register({
+  ["dL"] = { "d$", "Delete to end of line" },
+  ["dH"] = { "d^", "Delete to start of line" },
+})
+
+wk.register({
   ["<leader>e"] = { "<cmd>NvimTreeToggle<cr>", "File Tree" },
   ["<leader>a"] = { "O<Esc>", "Insert Line Above" },
   ["<leader>s"] = { "o<Esc>k", "Insert Line Below" },
@@ -327,7 +408,7 @@ wk.register({
   ["<leader>c"] = { name = "+nvim config" },
   ["<leader>cc"] = { "<cmd>edit ~/.config/nvim/init.lua<cr>", "Edit init.lua" },
 })
-
+-- tabs
 wk.register({
   ["<leader>["] = { "<cmd>bp<cr>", "Prev. Tab" },
   ["<leader>]"] = { "<cmd>bn<cr>", "Next Tab" },
@@ -335,7 +416,7 @@ wk.register({
 })
 
 wk.register({
-  ["<leader>f"] = { name = "+file" },
+  ["<leader>f"] = { name = "+File" },
   ["<leader>ff"] = { "<cmd>Telescope find_files<cr>", "Find File" },
   ["<leader>fr"] = { "<cmd>Telescope oldfiles<cr>", "Open Recent File" },
   ["<leader>fb"] = { "<cmd>Telescope buffers<cr>", "Open Buffer" },
@@ -344,10 +425,22 @@ wk.register({
 })
 
 wk.register({
-  ["<leader>l"] = { name = "+lsp" },
+  ["<leader>l"] = { name = "+LSP" },
   ["<leader>lk"] = { "<cmd>Telescope lsp_workspace_symbols<cr>", "Find Symbols" },
   ["<leader>ld"] = { "<cmd>Telescope lsp_document_symbols<cr>", "Find Document Symbols" },
+  ["<leader>lf"] = { '<cmd>lua require("telescope.builtin").lsp_document_symbols({ symbols = { "method" } })<CR>', "Find Functions" },
   ["<leader>lr"] = { "<cmd>lua vim.lsp.buf.rename()<cr>", "Replace Document Symbols" },
 })
 
-vim.cmd("colorscheme gruvbox")
+wk.register({
+  ["<leader>j"] = { name = "+ChatGPT" },
+  ["<leader>jj"] = { "<cmd>ChatGPT<cr>", "Start ChatGPT" },
+  ["<leader>ji"] = { "<cmd>ChatGPTEditWithInstructions<cr>", "Instruct Edit", mode = {"n", "v"} },
+  ["<leader>je"] = { "<cmd>ChatGPTRun explain_code<cr>", "Explain", mode = {"n", "v"} },
+  ["<leader>jc"] = { "<cmd>ChatGPTRun complete_code<cr>", "Complete", mode = {"n", "v"} },
+  ["<leader>jf"] = { "<cmd>ChatGPTRun fix_bugs<cr>", "Complete", mode = {"n", "v"} },
+  ["<leader>jt"] = { "<cmd>ChatGPTRun add_tests<cr>", "Complete", mode = {"n", "v"} },
+})
+
+
+vim.cmd("colorscheme catppuccin")
