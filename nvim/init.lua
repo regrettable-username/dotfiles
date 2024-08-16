@@ -29,7 +29,7 @@ require("lazy").setup({
     event = "VeryLazy",
     init = function()
       vim.o.timeout = true
-      vim.o.timeoutlen = 400
+      vim.o.timeoutlen = 200
     end,
     opts = {
       -- your configuration comes here
@@ -38,22 +38,57 @@ require("lazy").setup({
     },
   },
 
+  {
+    'christoomey/vim-tmux-navigator',
+    lazy = false,
+  },
+
   'numToStr/Comment.nvim',
   'nvim-telescope/telescope.nvim',
   'nvim-treesitter/nvim-treesitter',
   'nvim-tree/nvim-tree.lua',
   'RRethy/vim-illuminate',
+  'neovim/nvim-lspconfig',
+
+  {
+    'segeljakt/vim-silicon',
+    event = "VeryLazy",
+    init = function()
+      vim.g.silicon = {
+        theme = 'Dracula',
+        font = 'Hack',
+        background = '#AAAAFF00',
+        ['shadow-color'] = '#0000',
+        ['line-pad'] = 2,
+        ['pad-horiz'] = 0,
+        ['pad-vert'] = 0,
+        ['shadow-blur-radius'] = 1,
+        ['shadow-offset-x'] = 0,
+        ['shadow-offset-y'] = 0,
+        ['line-number'] = true,
+        ['round-corner'] = true,
+        ['window-controls'] = true,
+      }
+    end
+  },
+
   'nvim-lua/plenary.nvim',  -- Dependency for Telescope
 
+  {
+    "folke/trouble.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    opts = {
+    },
+  },
   { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }, -- Optional for better performance
 
-  'neovim/nvim-lspconfig',
   'williamboman/mason.nvim',
   'williamboman/mason-lspconfig.nvim',
   'williamboman/nvim-lsp-installer',
   'hrsh7th/nvim-cmp',
   'hrsh7th/cmp-nvim-lsp', -- LSP source for nvim-cmp
   'ziglang/zig.vim',
+  'mfussenegger/nvim-dap',
   {'nvim-lualine/lualine.nvim'},
   {'akinsho/bufferline.nvim', version = "*", dependencies = 'nvim-tree/nvim-web-devicons'},
   {'akinsho/toggleterm.nvim', version = "*", config = true},
@@ -65,7 +100,6 @@ require("lazy").setup({
       require("copilot").setup({})
     end,
   },
-
   {
      "zbirenbaum/copilot-cmp",
      after = { "copilot.lua" },
@@ -99,11 +133,15 @@ require("lazy").setup({
     build = "make install",
     config = function()
       require 'xbase'.setup {
-        log_level = vim.log.levels.DEBUG,
+        log_level = vim.log.levels.OFF,
         simctl = {
           iOS = {
             "iPhone 15 Pro"
           }
+        },
+        log_buffer = {
+          focus = false,
+          height = 10
         },
         mappings = {
           build_picker = 0,
@@ -115,18 +153,25 @@ require("lazy").setup({
         }
       }
     end
-  }
+  },
+  {
+    "rust-lang/rust.vim",
+    ft = "rust",
+    init = function()
+      vim.g.rustfmt_autosave = 1
+    end
+  },
 })
 
 -- Setup Toggleterm
-require("toggleterm").setup{
+require("toggleterm").setup {
   size = 10,
-  open_mapping = [[<c-b>]],
+  open_mapping = [[<leader>tt]],
   shade_filetypes = {},
   shade_terminals = true,
   shading_factor = 1,
   start_in_insert = true,
-  insert_mappings = true,
+  insert_mappings = false,
   persist_size = true,
   direction = 'horizontal',
 }
@@ -196,6 +241,26 @@ require("nvim-tree").setup({
   on_attach = tree_on_attach,
 })
 
+-- DAP config
+local dap = require('dap')
+dap.adapters.lldb = {
+  type = 'executable',
+  command = '/opt/homebrew/opt/llvm/bin/lldb-vscode',
+  name = 'lldb',
+}
+
+dap.configurations.zig = {
+  {
+    name = 'Launch',
+    type = 'lldb',
+    request = 'launch',
+    program = '/Users/b/dev/pl/zig_hello_world/zig-out/bin/zig_hello_world',
+    cwd = '/Users/b/dev/pl/zig_hello_world/',
+    stopOnEntry = false,
+    args = {},
+  },
+}
+
 -- LSP config 
 require('nvim-lsp-installer').setup {
   diagnostics = "nvim_lsp",
@@ -225,6 +290,7 @@ local server_settings = {
           "clangd",
           "--offset-encoding=utf-16",
       },
+      filetypes = { "cpp", "m", "objc" },
     },
     sourcekit = {
       on_attach = function(_, bufnr)
@@ -235,9 +301,9 @@ local server_settings = {
         '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
         vim.api.nvim_buf_set_keymap(bufnr, 'n', '$',
         '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
-        vim.keymap.set('n', '<leader>dl', function()
-          require "xbase.logger".toggle(false, true)
-        end, { desc = "XBase logger" })
+        -- vim.keymap.set('n', '<leader>dl', function()
+        --   require "xbase.logger".toggle(false, false)
+        -- end, { desc = "XBase logger" })
       end,
       filetypes = { "swift" },
       root_dir = lspconfig.util.root_pattern("*.xcodeproj", "*.xcworkspace", "Package.swift", ".git", "project.yml", "Project.swift"),
@@ -252,7 +318,8 @@ local server_settings = {
 }
 
 -- List of servers you want to setup
-local servers = {'pyright', 'tsserver', 'rust_analyzer', 'lua_ls', 'zls', 'clangd', 'sourcekit'}
+local servers = {'pyright', 'tsserver', 'rust_analyzer', 'lua_ls', 'zls', 'clangd', 'sourcekit', 'autotools_ls'}
+
 
 for _, lsp in ipairs(servers) do
     lspconfig[lsp].setup(vim.tbl_deep_extend("force", {
@@ -271,14 +338,55 @@ for _, lsp in ipairs(servers) do
     }, server_settings[lsp] or {})) -- Merge specific server settings
 end
 
+lspconfig.pyright.setup{
+    settings = {
+        python = {
+            analysis = {
+                autoSearchPaths = true,
+                useLibraryCodeForTypes = true,
+                diagnosticMode = "workspace"
+            }
+        }
+    }
+}
+
+lspconfig.rust_analyzer.setup({
+    settings = {
+        ["rust-analyzer"] = {
+            imports = {
+                granularity = {
+                    group = "module",
+                },
+                prefix = "self",
+            },
+            cargo = {
+                buildScripts = {
+                    enable = true,
+                },
+            },
+            procMacro = {
+                enable = true
+            },
+            diagnostics = {
+              disabled = {"inactive-code"}
+            },
+        }
+    }
+})
+vim.g.rust_recommended_style = '0'
+vim.g.cmptoggle = false
 local cmp = require('cmp')
 cmp.setup({
+  enabled = function()
+    return vim.g.cmptoggle
+  end,
     snippet = {
         -- REQUIRED for `nvim-cmp` snippet support
         -- expand = function(args)
             -- Configure your snippet engine here; `vim-vsnip` is a common choice
         --end,
     },
+
     mapping = cmp.mapping.preset.insert({
         ['<Tab>'] = cmp.mapping.select_next_item(),
         ['<S-Tab>'] = cmp.mapping.select_prev_item(),
@@ -290,6 +398,15 @@ cmp.setup({
         { name = 'nvim_lsp', group_index = 2 },
         -- Add other sources as needed
     }),
+})
+
+--fix objc comment string 
+vim.api.nvim_create_autocmd("FileType", {
+  group = vim.api.nvim_create_augroup("FixObjcCommentString", { clear = true }),
+  callback = function(ev)
+    vim.bo[ev.buf].commentstring = "// %s"
+  end,
+  pattern = { "objc" },
 })
 
 -- Illuminate config for highlighting words
@@ -351,9 +468,9 @@ require('illuminate').configure({
 -- Bufferline config
 require("bufferline").setup()
 --lualine 
+
 require('lualine').setup {}
 vim.opt.termguicolors = true
-
 vim.o.expandtab = true
 vim.o.shiftwidth = 2
 vim.o.tabstop = 2
@@ -374,6 +491,69 @@ vim.cmd [[
   augroup END
 ]]
 
+local function formatSwiftBuffer()
+    -- Save the current buffer
+    vim.cmd('write')
+
+    -- Get the current buffer's file path
+    local filePath = vim.api.nvim_buf_get_name(0)
+
+    -- Run swift-format on the file
+    vim.fn.system("swift-format -i " .. filePath)
+
+    -- Reload the buffer to reflect changes
+    vim.cmd('edit!')
+end
+
+vim.api.nvim_create_augroup("MakefileSettings", {clear=true})
+
+-- Autocommand to adjust settings for Makefiles
+vim.api.nvim_create_autocmd('FileType', {
+    pattern = 'make',
+    group = 'MakefileSettings',
+    callback = function()
+        -- Set buffer-specific options for Makefiles
+        vim.opt_local.expandtab = false
+        vim.opt_local.tabstop = 4
+        vim.opt_local.shiftwidth = 4
+        vim.opt_local.softtabstop = 4
+    end,
+})
+
+vim.api.nvim_create_autocmd("BufWritePre", {
+    pattern = "*.swift",
+    callback = formatSwiftBuffer
+})
+
+-- Format C and Objective-C files with clang-format on save
+function FormatBufferWithClangFormat()
+    -- Store the current view to restore cursor position and view after formatting
+    local view = vim.fn.winsaveview()
+
+    -- Get the current buffer's content
+    local buf_content = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
+    -- Run clang-format on the buffer's content
+    local formatted_content = vim.fn.system("clang-format", buf_content)
+
+    -- Check for errors from clang-format
+    if vim.v.shell_error == 0 then
+        -- Replace the buffer's content with the formatted content
+        vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(formatted_content, "\n"))
+    else
+        -- Optionally print an error message or handle the error
+        print("Error formatting with clang-format")
+    end
+
+    -- Restore the cursor position and view
+    vim.fn.winrestview(view)
+end
+-- Set up an autocmd to format .c, .h, .m, .cpp, and .hpp files on save
+vim.api.nvim_create_autocmd("BufWritePre", {
+    pattern = {"*.c", "*.h", "*.m", "*.cpp", "*.hpp"},
+    callback = FormatBufferWithClangFormat,
+})
+
+--
 -- Set absolute line numbers by default
 
 local map = vim.api.nvim_set_keymap
@@ -389,6 +569,10 @@ map('n', 'K', '{', opts)
 map('n', 'L', '$', opts)
 map('n', 'H', '^', opts)
 
+map('v', 'J', '}', opts)
+map('v', 'K', '{', opts)
+map('v', 'L', '$', opts)
+map('v', 'H', '^', opts)
 -- Setup whichkey
 local wk = require("which-key")
 
@@ -399,9 +583,9 @@ wk.register({
 
 wk.register({
   ["<leader>e"] = { "<cmd>NvimTreeToggle<cr>", "File Tree" },
-  ["<leader>a"] = { "O<Esc>", "Insert Line Above" },
-  ["<leader>s"] = { "o<Esc>k", "Insert Line Below" },
-  ["<leader>d"] = { "o<Esc>kO<Esc>j", "Pad Line" },
+  ["<leader>a"] = { "O<Esc>", "Insert Line Above", mode = {"n"} },
+  ["<leader>s"] = { "o<Esc>k", "Insert Line Below", mode = {"n"} },
+  ["<leader>d"] = { "o<Esc>kO<Esc>j", "Pad Line", mode = {"n"} },
 })
 
 wk.register({
@@ -425,11 +609,22 @@ wk.register({
 })
 
 wk.register({
+  fs = { "<esc><cmd>'<,'>Silicon<CR>", "Run Silicon on selection" },
+}, { mode = "v", prefix = "<leader>" })
+
+wk.register({
+  ["<leader>t"] = { name = "+Trouble" },
+  ["<leader>te"] = { "<cmd>TroubleToggle document_diagnostics<cr>", "Toggle Trouble" },
+})
+
+wk.register({
   ["<leader>l"] = { name = "+LSP" },
+  ["<leader>lc"] = { "<cmd>lua vim.g.cmptoggle = not vim.g.cmptoggle<cr>", "Toggle completion" },
   ["<leader>lk"] = { "<cmd>Telescope lsp_workspace_symbols<cr>", "Find Symbols" },
   ["<leader>ld"] = { "<cmd>Telescope lsp_document_symbols<cr>", "Find Document Symbols" },
   ["<leader>lf"] = { '<cmd>lua require("telescope.builtin").lsp_document_symbols({ symbols = { "method" } })<CR>', "Find Functions" },
   ["<leader>lr"] = { "<cmd>lua vim.lsp.buf.rename()<cr>", "Replace Document Symbols" },
+  ["<leader>li"] = { "<cmd>lua vim.lsp.buf.format()<cr>", "Replace Document Symbols" },
 })
 
 wk.register({
@@ -440,6 +635,13 @@ wk.register({
   ["<leader>jc"] = { "<cmd>ChatGPTRun complete_code<cr>", "Complete", mode = {"n", "v"} },
   ["<leader>jf"] = { "<cmd>ChatGPTRun fix_bugs<cr>", "Complete", mode = {"n", "v"} },
   ["<leader>jt"] = { "<cmd>ChatGPTRun add_tests<cr>", "Complete", mode = {"n", "v"} },
+})
+
+wk.register({
+  ["<c-j>"] = { "<cmd> TmuxNavigateDown<CR>", "window down" },
+  ["<c-k>"] = { "<cmd> TmuxNavigateUp<CR>", "window up" },
+  ["<c-H>"] = { "<cmd> TmuxNavigateLeft<CR>", "window left" },
+  ["<c-l>"] = { "<cmd> TmuxNavigateRight<CR>", "window right" },
 })
 
 
