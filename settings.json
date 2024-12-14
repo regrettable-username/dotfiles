@@ -1,29 +1,154 @@
-// Zed settings
-//
-// For information on how to configure Zed, see the Zed
-// documentation: https://zed.dev/docs/configuring-zed
-//
-// To see all of Zed's default settings without changing your
-// custom settings, run the `open default settings` command
-// from the command palette or from `Zed` application menu.
 {
-  "assistant": {
-    "default_model": {
-      "provider": "openai",
-      "model": "gpt-4"
-    },
-    "version": "2"
-  },
-  "telemetry": {
-    "diagnostics": false,
-    "metrics": false
-  },
-  "vim_mode": true,
-  "ui_font_size": 16,
-  "buffer_font_size": 16,
-  "theme": {
-    "mode": "system",
-    "light": "Andromeda",
-    "dark": "Ayu Dark"
-  }
+    "window.commandCenter": 1,
+    "vim.camelCaseMotion.enable": true,
+    "vim.commandLineModeKeyBindings": [],
+    "vim.insertModeKeyBindings": [
+        {
+            "before": [
+                "j",
+                "k"
+            ],
+            "after": [
+                "<ESC>"
+            ]
+        },
+        {
+            "before": [
+                "k",
+                "j"
+            ],
+            "after": [
+                "<ESC>"
+            ]
+        }
+    ],
+    "vim.visualModeKeyBindings": [
+        {
+            "before": [
+                "J"
+            ],
+            "after": [
+                "}"
+            ]
+        },
+        {
+            "before": [
+                "K"
+            ],
+            "after": [
+                "{"
+            ]
+        },
+        {
+            "before": [
+                "H"
+            ],
+            "after": [
+                "^"
+            ]
+        },
+        {
+            "before": [
+                "L"
+            ],
+            "after": [
+                "$"
+            ]
+        }
+    ],
+    "vim.statusBarColors.visual": "",
+    "vim.normalModeKeyBindings": [
+        {
+            "before": [
+                "J"
+            ],
+            "after": [
+                "}"
+            ]
+        },
+        {
+            "before": [
+                "K"
+            ],
+            "after": [
+                "{"
+            ]
+        },
+        {
+            "before": [
+                "H"
+            ],
+            "after": [
+                "^"
+            ]
+        },
+        {
+            "before": [
+                "L"
+            ],
+            "after": [
+                "$"
+            ]
+        },
+        {
+            "before": [
+                "d",
+                "H"
+            ],
+            "after": [
+                "d",
+                "^"
+            ]
+        },
+        {
+            "before": [
+                "d",
+                "L"
+            ],
+            "after": [
+                "d",
+                "$"
+            ]
+        },
+        {
+            "before": [
+                "<leader>",
+                "s"
+            ],
+            "after": [
+                "o",
+                "<Esc>"
+            ]
+        },
+        {
+            "before": [
+                "<leader>",
+                "a"
+            ],
+            "after": [
+                "O",
+                "<Esc>"
+            ]
+        },
+        {
+            "before": [
+                "<leader>",
+                "d"
+            ],
+            "after": [
+                "O",
+                "<Esc>",
+                "j",
+                "o",
+                "<Esc>",
+                "k"
+            ]
+        }
+    ],
+    "vim.leader": "<space>",
+    "editor.formatOnSave": true,
+    "editor.minimap.maxColumn": 90,
+    "editor.formatOnPaste": true,
+    "editor.fontFamily": "CaskaydiaCove Nerd Font",
+    "editor.fontSize": 16,
 }
